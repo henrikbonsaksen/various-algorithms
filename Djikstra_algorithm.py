@@ -1,47 +1,59 @@
-class Graph2:
-    graph = dict()
+import sys
 
-    def dijkstra(self):
-        visited = []
-        node = self.find_lowest_cost(visited)
-        
-        while node is not None:
-            print("[", node, end=" ] ")
-            cost = self.costs[node]
-            neighbors = self.graph[node]
+# Function to find out which of the unvisited node 
+# needs to be visited next
+def to_be_visited():
+  global visited_and_distance
+  v = -10
+  # Choosing the vertex with the minimum distance
+  for index in range(number_of_vertices):
+    if visited_and_distance[index][0] == 0 \
+      and (v < 0 or visited_and_distance[index][1] <= \
+      visited_and_distance[v][1]):
+        v = index
+  return v
 
-            for n in neighbors.keys():
-                new_cost = cost + neighbors[n]
-                if self.costs[n] > new_cost:
-                    self.costs[n] = new_cost
-            visited.append(node)
-            node = self.find_lowest_cost(visited)
+# Creating the graph as an adjacency matrix
+vertices = [[0, 1, 1, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+            [0, 0, 0, 0]]
+edges =  [[0, 3, 4, 0],
+          [0, 0, 0.5, 0],
+          [0, 0, 0, 1],
+          [0, 0, 0, 0]]
 
-    def find_lowest_cost(self, visited):
-        lowest_cost = float('inf')
-        lowest_cost_node = None
+number_of_vertices = len(vertices[0])
 
-        for node in self.costs:
-            cost = self.costs[node]
-            if cost < lowest_cost \
-                    and node not in visited:
-                lowest_cost = cost
-                lowest_cost_node = node
-        return lowest_cost
+# The first element of the lists inside visited_and_distance 
+# denotes if the vertex has been visited.
+# The second element of the lists inside the visited_and_distance 
+# denotes the distance from the source.
+visited_and_distance = [[0, 0]]
+for i in range(number_of_vertices-1):
+  visited_and_distance.append([0, sys.maxsize])
 
-    def set_costs(self, costs):
-        self.costs = costs
+for vertex in range(number_of_vertices):
+  # Finding the next vertex to be visited.
+  to_visit = to_be_visited()
+  for neighbor_index in range(number_of_vertices):
+    # Calculating the new distance for all unvisited neighbours
+    # of the chosen vertex.
+    if vertices[to_visit][neighbor_index] == 1 and \
+     visited_and_distance[neighbor_index][0] == 0:
+      new_distance = visited_and_distance[to_visit][1] \
+      + edges[to_visit][neighbor_index]
+      # Updating the distance of the neighbor if its current distance
+      # is greater than the distance that has just been calculated
+      if visited_and_distance[neighbor_index][1] > new_distance:
+        visited_and_distance[neighbor_index][1] = new_distance
+    # Visiting the vertex found earlier
+    visited_and_distance[to_visit][0] = 1
 
+i = 0 
 
-g2 = Graph2()
-
-my_graph = g2.graph
-my_graph['start'] = {'A': 6, 'B': 2}
-my_graph['A'] = {'finish': 1}
-my_graph['B'] = {'A': 3, 'finish': 5}
-my_graph['finish'] = {}
-
-costs = {'A': 6, 'B': 2, 'finish': float('inf')}
-g2.set_costs(costs)
-
-g2.dijkstra()
+# Printing out the shortest distance from the source to each vertex       
+for distance in visited_and_distance:
+  print("The shortest distance of ",chr(ord('a') + i),\
+  " from the source vertex a is:",distance[1])
+  i = i + 1
